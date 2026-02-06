@@ -11,20 +11,14 @@
   <url type="readme" branch="main">https://github.com/sonejostudios/FreeCAD-Tessellator/blob/main/README.md</url>
   <icon>freecad/Tessellator/Resources/Icons/Logo.svg</icon>
   <freecadmin>1.0</freecadmin>
+  <tag>BIM</tag>
+  <depend>Draft</depend>
+  <depend>math</depend>
+  <depend>os</depend>
+  <depend>json</depend>
 
   <content>
-    <macro>
-      <name>Tessellator</name>
-      <description>A FreeCAD BIM macro to fill up areas with boards or generate tile patterns.</description>
-      <version>1.0.0</version>
-      <subdirectory>./Tessellator</subdirectory>
-      <file>Tessellator.FCMacro</file>
-      <tag>BIM</tag>
-      <depend>Draft</depend>
-      <depend>math</depend>
-      <depend>os</depend>
-      <depend>json</depend>
-    </macro>
+    <other/>
   </content>
 
 </package>
