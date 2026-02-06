@@ -1,1 +1,1 @@
-{"area_length": 3150.0, "area_width": 2000.0, "board_length": 2000.0, "board_width": 600.0, "board_height": 15.0, "vertical_design": false, "reverse_order": false, "create_area_object": true, "add_labels": true, "remove_b_cuts": 0, "pattern": "500,250", "algorithm_tab": 1}
+{"create_area_object": true, "vertical_design": false, "algorithm_tab": 1, "reverse_order": false, "remove_b_cuts": 0, "board_length": 1993.0, "board_height": 15.0, "board_width": 600.0, "area_length": 3150.0, "add_labels": true, "area_width": 2000.0, "pattern": "500,250"}

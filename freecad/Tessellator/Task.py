@@ -18,7 +18,7 @@
 # - Create the area object
 # - Add lengths labels to the boards/tiles for cutting
 
-from .Presets import PRESETS
+from .Presets import Presets
 from .Misc import asInterface , asIcon , Paths
 
 import FreeCAD
@@ -30,27 +30,16 @@ import os
 import json
 
 
-__Name__ = "Tessellator"
-__Version__ = "1.0.0"
-
-
-DOC = FreeCAD.ActiveDocument
-
-
 class BoxTaskPanel:
 
     def __init__(self):
-        # get macro path
-        self.macro_path = FreeCAD.getUserMacroDir()
 
-        # set save file
         self.save_file_path = Paths['Save']
 
         # load ui
         self.form = FreeCADGui.PySideUic.loadUi(asInterface('Task')) # type: ignore
 
-        # name and version
-        self.form.setWindowTitle(__Name__ + " " + __Version__)
+        self.form.setWindowTitle('Tesselate')
 
         # sizes
         self.AREA_LENGTH = 5600
@@ -69,7 +58,7 @@ class BoxTaskPanel:
         self.form.ProgressBar.hide()
 
         # set presets
-        self.form.PresetsComboBox.insertItems(1, [i[0] for i in PRESETS])
+        self.form.PresetsComboBox.insertItems(1, [i[0] for i in Presets])
 
         # load save
         self.load_values()
@@ -115,42 +104,56 @@ class BoxTaskPanel:
         self.form.TabWidgetAlgorithm.currentChanged.connect(self.update_results)
 
 
+    def _isAnythingInvalid ( self ):
+        return (
+            self.AREA_LENGTH == 0 or
+            self.AREA_WIDTH == 0 or
+            self.board[ 'bl' ] == 0 or
+            self.board[ 'bw' ] == 0 or
+            self.BOARD_HEIGHT == 0 or
+            self.form.LineEditPattern.text() == ''
+        )
+
 
     def accept(self):
-        if (self.AREA_LENGTH == 0) or (self.AREA_WIDTH == 0) or (self.board["bl"] == 0) or (self.board["bw"] == 0) or (self.BOARD_HEIGHT == 0) or self.form.LineEditPattern.text() == "":
-           print("Error! None of the values can be 0 or empty!")
+
+        if self._isAnythingInvalid():
+           print('Error! None of the values can be 0 or empty!')
            return
 
         # set board template
-        self.board = {"x": self.POS_X, "y": self.POS_Y, "bl": self.BOARD_LENGTH, "bw": self.BOARD_WIDTH, "n": self.N_BOARD}
 
-        # save values
+        self.board = {
+            'bl' : self.BOARD_LENGTH ,
+            'bw' : self.BOARD_WIDTH ,
+            'n' : self.N_BOARD ,
+            'x' : self.POS_X ,
+            'y' : self.POS_Y
+        }
+
         self.save_values()
-
-        # run macro
         self.run_all()
 
-        # close dialog
         FreeCADGui.Control.closeDialog()
 
 
-
-
     def save_values(self):
+
         data = {
-            "area_length": self.form.AreaLength.value(),
-            "area_width": self.form.AreaWidth.value(),
-            "board_length": self.form.BoardLength.value(),
-            "board_width": self.form.BoardWidth.value(),
-            "board_height": self.form.BoardHeight.value(),
-            "vertical_design": self.form.RadioBtVertical.isChecked(),
-            "reverse_order": self.form.ReverseOrder.isChecked(),
-            "create_area_object": self.form.CreateAreaObject.isChecked(),
-            "add_labels": self.form.AddLabels.isChecked(),
-            "remove_b_cuts": self.form.RemoveBCuts.value(),
-            "pattern": self.form.LineEditPattern.text(),
-            "algorithm_tab": self.form.TabWidgetAlgorithm.currentIndex()
+            'create_area_object' : self.form.CreateAreaObject.isChecked() ,
+            'vertical_design' : self.form.RadioBtVertical.isChecked() ,
+            'algorithm_tab' : self.form.TabWidgetAlgorithm.currentIndex() ,
+            'reverse_order' : self.form.ReverseOrder.isChecked() ,
+            'remove_b_cuts' : self.form.RemoveBCuts.value() ,
+            'board_length' : self.form.BoardLength.value() ,
+            'board_height' : self.form.BoardHeight.value() ,
+            'board_width' : self.form.BoardWidth.value() ,
+            'area_length' : self.form.AreaLength.value() ,
+            'add_labels' : self.form.AddLabels.isChecked() ,
+            'area_width' : self.form.AreaWidth.value() ,
+            'pattern' : self.form.LineEditPattern.text()
         }
+
         with open(self.save_file_path, mode="w", encoding="utf-8") as write_file:
             json.dump(data, write_file)
 
@@ -196,9 +199,9 @@ class BoxTaskPanel:
 
     def set_preset(self, index):
         if index > 0:
-            self.form.BoardLength.setValue(PRESETS[index-1][1])
-            self.form.BoardWidth.setValue(PRESETS[index-1][2])
-            self.form.BoardHeight.setValue(PRESETS[index-1][3])
+            self.form.BoardLength.setValue(Presets[index-1][1])
+            self.form.BoardWidth.setValue(Presets[index-1][2])
+            self.form.BoardHeight.setValue(Presets[index-1][3])
 
 
 
@@ -217,11 +220,6 @@ class BoxTaskPanel:
                 self.form.AreaWidth.setValue(sizes[1])
 
 
-
-
-
-
-
     def swap_area_values(self):
         l = self.form.AreaLength.value()
         w = self.form.AreaWidth.value()
@@ -229,13 +227,11 @@ class BoxTaskPanel:
         self.form.AreaWidth.setValue(l)
 
 
-
     def swap_board_values(self):
         l = self.form.BoardLength.value()
         w = self.form.BoardWidth.value()
         self.form.BoardLength.setValue(w)
         self.form.BoardWidth.setValue(l)
-
 
 
     def update_results(self):
@@ -274,7 +270,13 @@ class BoxTaskPanel:
 
 
     def create_next_board(self, name):
-        myObj = DOC.addObject("Part::Box", name)
+
+        document = FreeCAD.ActiveDocument
+
+        if not document:
+            return
+
+        myObj = document.addObject("Part::Box", name)
         myObj.Length = self.board["bl"]
         myObj.Width = self.board["bw"]
         myObj.Height = self.BOARD_HEIGHT
@@ -430,6 +432,12 @@ class BoxTaskPanel:
 
 
     def run_all(self):
+
+        document = FreeCAD.ActiveDocument
+
+        if not document:
+            return
+
         # update everything
         self.update_results()
 
@@ -439,7 +447,7 @@ class BoxTaskPanel:
 
         # create area object
         if self.form.CreateAreaObject.isChecked():
-            self.area_object = DOC.addObject("Part::Box", "Area")
+            self.area_object = document.addObject("Part::Box", "Area")
             self.area_object.Length = self.AREA_LENGTH
             self.area_object.Width = self.AREA_WIDTH
             self.area_object.Height = 100
@@ -453,15 +461,15 @@ class BoxTaskPanel:
 
         # create label container if needed
         if self.form.AddLabels.isChecked():
-            self.label_container = DOC.addObject('App::Part', 'Labels')
+            self.label_container = document.addObject('App::Part', 'Labels')
 
 
         # GENERATE boards and tiles and put them into a container
         if self.form.TabWidgetAlgorithm.currentIndex() == 0:
-            self.board_container = DOC.addObject('App::Part', 'Boards')
+            self.board_container = document.addObject('App::Part', 'Boards')
             self.generate_boards()
         else:
-            self.board_container = DOC.addObject('App::Part', 'Tiles')
+            self.board_container = document.addObject('App::Part', 'Tiles')
             self.generate_pattern()
 
 
@@ -480,4 +488,4 @@ class BoxTaskPanel:
 
 
         # recompute document
-        DOC.recompute()
+        document.recompute()
