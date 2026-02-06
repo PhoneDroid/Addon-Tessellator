@@ -9,7 +9,7 @@
   <license file="LICENSE">GPL-3.0-or-later</license>
   <url type="repository" branch="main">https://github.com/sonejostudios/FreeCAD-Tessellator</url>
   <url type="readme" branch="main">https://github.com/sonejostudios/FreeCAD-Tessellator/blob/main/README.md</url>
-  <icon>Tessellator/Tessellator_icon.svg</icon>
+  <icon>freecad/Tessellator/Resources/Icons/Logo.svg</icon>
   <freecadmin>1.0</freecadmin>
 
   <content>
