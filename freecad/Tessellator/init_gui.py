@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileNotice: Part of the Tessellator project.
+
+
 # A FreeCAD BIM macro to fill up areas with boards or generate tile patterns.
 # Two Algorithms are available:
 #
@@ -522,9 +526,3 @@ class BoxTaskPanel:
 if __name__ == '__main__':
     panel = BoxTaskPanel()
     FreeCADGui.Control.showDialog(panel)
-
-
-
-
-
-
